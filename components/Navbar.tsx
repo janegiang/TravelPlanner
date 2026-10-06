@@ -6,25 +6,26 @@ import { login } from "@/lib/auth-actions";
 
 export default function Navbar() {
   return (
-    <nav className="bg-white shadow-md py-4 border-b border-gray-200">
+    <nav className="bg-white shadow-md py-2 border-b border-gray-200">
       {" "}
       <div className="container mx-auto flex justify-between items-center px-6 lg:px-8">
         <Link href={"/"} className="flex items-center">
           <Image src={"/logo(1).png"} alt="logo" width={50} height={50} />
-          <span className="text-2xl font-bold text-gray-800">
-            {" "}
-            Trip Planner{" "}
-          </span>
+          <span className="text-2xl font-bold text-gray-800">Trip Planner</span>
         </Link>
         <div className="flex items-center space-x-4">
-          <Link href={"/trips"} className="text-slate-900 hover:text-sky-500">
+          <Link
+            href={"/my-trips"}
+            className="text-slate-900 hover:text-sky-500"
+          >
             My Trips
           </Link>
           <Link href={"/map"} className="text-slate-900 hover:text-sky-500">
             Map
           </Link>
-          <button className="flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white p-2 rounded-sm cursor-pointer" 
-                  onClick={login}
+          <button
+            className="flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white p-2 rounded-sm cursor-pointer"
+            onClick={login}
           >
             Sign In
             <svg
