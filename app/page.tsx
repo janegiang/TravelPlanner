@@ -13,13 +13,13 @@ export default async function Home() {
         <div className="space-y-6 container mx-auto px-4 py-8">
           {session ? (
             <Link href="/trips/new">
-              <button className="rounded-lg bg-black px-6 py-3 text-white">
+              <button className="rounded-lg bg-black px-6 py-3 text-white hover:bg-gray-900 cursor-pointer">
                 Plan My Trip
               </button>
             </Link>
           ) : (
             <button
-              className="rounded-lg bg-black px-6 py-3 text-white"
+              className="rounded-lg bg-black px-6 py-3 text-white hover:bg-gray-900 cursor-pointer"
               //className="flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white p-2 rounded-sm cursor-pointer"
               onClick={login}
             >
