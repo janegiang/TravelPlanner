@@ -80,6 +80,7 @@ model Trip{
   userId String
 
   locations Location[]
+  flights Flight[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -94,4 +95,21 @@ model Location {
   tripId String
   order Int @default(0)
   createdAt DateTime @default(now())
+}
+
+model Flight {
+  id             String   @id @default(cuid())
+  flightNumber   String   
+  airline        String
+  departureAirport String
+  departureDate  String
+  departureTime  String?
+  arrivalAirport   String
+  arrivalDate    String?
+  arrivalTime    String?
+  status         String
+  trip           Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
