@@ -17,7 +17,10 @@ export default async function TripDetail({
 
   const trip = await prisma.trip.findFirst({
     where: { id: tripId, userId: session.user?.id },
-    include: { locations: true },
+    include: {
+      locations: true,
+      flights: true,
+    },
   });
 
   console.log(trip);
