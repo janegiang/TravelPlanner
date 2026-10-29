@@ -40,10 +40,47 @@
 "use client";
 
 import { Location } from "@/app/generated/prisma/client";
-import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, Marker, useMap } from "@vis.gl/react-google-maps";
 
 interface MapProps {
   itineraries: Location[];
+}
+
+// Handle marker clicks
+function LocationMarkers({ itineraries }: { itineraries: Location[] }) {
+  const map = useMap();
+
+  function handleMarkerClick(location: Location) {
+    if (!map) return;
+
+    // Get the clicked marker's coordinates
+    const position = {
+      lat: location.lat,
+      lng: location.lng,
+    };
+
+    // Center the map on the clicked marker
+    map.panTo(position);
+
+    // Zoom in on the clicked marker
+    map.setZoom(16);
+  }
+
+  return (
+    <>
+      {itineraries.map((location) => (
+        <Marker
+          key={location.id}
+          position={{
+            lat: location.lat,
+            lng: location.lng,
+          }}
+          title={location.locationTitle}
+          onClick={() => handleMarkerClick(location)}
+        />
+      ))}
+    </>
+  );
 }
 
 export default function ItineraryMap({ itineraries }: MapProps) {
@@ -57,11 +94,7 @@ export default function ItineraryMap({ itineraries }: MapProps) {
       <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
         <Map defaultCenter={center} defaultZoom={12} gestureHandling="greedy">
           {itineraries.map((location, key) => (
-            <Marker
-              key={key}
-              position={{ lat: location.lat, lng: location.lng }}
-              title={location.locationTitle}
-            />
+            <LocationMarkers itineraries={itineraries} />
           ))}
         </Map>
       </APIProvider>
