@@ -36,7 +36,7 @@ function SortableItem({ item }: { item: Location }) {
           {`Latitude: ${item.lat}, Longitude: ${item.lng}`}
         </p>
       </div>
-      <div className="text-sm text-gray-600">Day {item.order}</div>
+      <div className="text-sm text-gray-600">Day {item.order + 1}</div>
     </div>
   );
 }
