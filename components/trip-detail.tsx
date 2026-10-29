@@ -186,32 +186,47 @@ export default function TripDetailClient({ trip }: TripDetailClientProps) {
               </div>
             ) : (
               <div className="space-y-4">
-                {trip.flights.map((flight) => (
-                  <div
-                    key={flight.id}
-                    className="p-4 border rounded-lg bg-gray-50 flex justify-between items-center"
-                  >
-                    <div>
-                      <h3 className="font-bold text-lg">
-                        {flight.flightNumber}
-                      </h3>
-                      <p className="text-sm text-gray-600 font-medium">
-                        {flight.airline || "Airline TBD"}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {flight.departureAirport || "Origin"} ➔{" "}
-                        {flight.arrivalAirport || "Destination"}
-                        <span className="ml-2 text-xs text-gray-400">
-                          ({new Date(flight.departureDate).toLocaleDateString()}
-                          )
-                        </span>
-                      </p>
+                {trip.flights.map((flight) => {
+                  // Fix: Safely parse YYYY-MM-DD string to avoid timezone shifting (e.g., showing 10/28 instead of 10/29)
+                  const formatLocalDate = (dateStr: string | null) => {
+                    if (!dateStr) return "TBD";
+                    // If it's stored as ISO string or YYYY-MM-DD, extract components directly
+                    const cleanDate = dateStr.includes("T")
+                      ? dateStr.split("T")[0]
+                      : dateStr;
+                    const [year, month, day] = cleanDate.split("-");
+                    if (year && month && day) {
+                      return `${parseInt(month)}/${parseInt(day)}/${year}`;
+                    }
+                    return dateStr;
+                  };
+
+                  return (
+                    <div
+                      key={flight.id}
+                      className="p-4 border rounded-lg bg-gray-50 flex justify-between items-center"
+                    >
+                      <div>
+                        <h3 className="font-bold text-lg">
+                          {flight.flightNumber}
+                        </h3>
+                        <p className="text-sm text-gray-600 font-medium">
+                          {flight.airline || "Airline TBD"}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {flight.departureAirport || "Origin"} ➔{" "}
+                          {flight.arrivalAirport || "Destination"}
+                          <span className="ml-2 text-xs text-gray-400">
+                            ({formatLocalDate(flight.departureDate)})
+                          </span>
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full uppercase">
+                        {flight.status || "schduled 5"}
+                      </span>
                     </div>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full uppercase">
-                      {flight.status || "Scheduled"}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </TabsContent>
@@ -260,4 +275,56 @@ export default function TripDetailClient({ trip }: TripDetailClientProps) {
 //       ))}
 //     </div>
 //   )}
+// </TabsContent>
+
+// <TabsContent value="flight" className="space-y-6">
+// <div className="flex justify-between items-center mb-4">
+// <h2 className="text-2xl font-semibold">Flight Information</h2>
+// <Link href={`/trips/${trip.id}/flight/new`}>
+// <Button>
+// <Plus className="mr-2 h-5 w-5" /> Add Flight
+// </Button>
+// </Link>
+// </div>
+// {trip.flights.length === 0 ? (
+// <div className="text-center p-4">
+// <p className="text-gray-500 mb-2">
+// Add flights to see their status
+// </p>
+// <Link href={`/trips/${trip.id}/flight/new`}>
+// <Button>
+// <Plus className="mr-2 h-5 w-5" /> Add Flight
+// </Button>
+// </Link>
+// </div>
+// ) : (
+// <div className="space-y-4">
+// {trip.flights.map((flight) => (
+// <div
+// key={flight.id}
+// className="p-4 border rounded-lg bg-gray-50 flex justify-between items-center"
+// >
+// <div>
+// <h3 className="font-bold text-lg">
+// {flight.flightNumber}
+// </h3>
+// <p className="text-sm text-gray-600 font-medium">
+// {flight.airline || "Airline TBD"}
+// </p>
+// <p className="text-sm text-gray-500">
+// {flight.departureAirport || "Origin"} ➔{" "}
+// {flight.arrivalAirport || "Destination"}
+// <span className="ml-2 text-xs text-gray-400">
+// ({new Date(flight.departureDate).toLocaleDateString()}
+// )
+// </span>
+// </p>
+// </div>
+// <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full uppercase">
+// {flight.status || "Scheduled"}
+// </span>
+// </div>
+// ))}
+// </div>
+// )}
 // </TabsContent>

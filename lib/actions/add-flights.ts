@@ -11,6 +11,13 @@ async function fetchFlightStatus(flightNumber: string, userFlightDate: string) {
   );
 
   const data = await response.json();
+  const nowUnixSeconds = Math.floor(Date.now() / 1000); // Current time in epoch seconds
+
+  const parseDateTimeParts = (dateTimeStr: string | null) => {
+    if (!dateTimeStr) return { date: null, time: null };
+    const [datePart, timePart] = dateTimeStr.split(" ");
+    return { date: datePart || null, time: timePart || null };
+  };
 
   if (data && data.response) {
     const flight = Array.isArray(data.response)
@@ -18,8 +25,16 @@ async function fetchFlightStatus(flightNumber: string, userFlightDate: string) {
       : data.response;
 
     if (flight) {
-      // If live flight date does not match user input, return partial data with null times
-      if (flight.dep_time && !flight.dep_time.startsWith(userFlightDate)) {
+      // Use local airport time string for date matching to avoid UTC timezone shifts
+      const depDateString = flight.dep_time
+        ? flight.dep_time.split(" ")[0]
+        : null;
+
+      // 1. SAFETY CHECK: Compare local-derived date with user input date
+      if (!depDateString || depDateString !== userFlightDate) {
+        const arr = parseDateTimeParts(flight.arr_time);
+        const dep = parseDateTimeParts(flight.dep_time);
+
         return {
           flightNumber: flight.flight_iata || flightNumber,
           airline:
@@ -27,25 +42,50 @@ async function fetchFlightStatus(flightNumber: string, userFlightDate: string) {
           departureAirport: flight.dep_iata || "TBD",
           arrivalAirport: flight.arr_iata || "TBD",
           departureDate: userFlightDate,
-          arrivalDate: null,
-          departureTime: null,
-          arrivalTime: null,
+          arrivalDate: arr.date || null,
+          departureTime: dep.time || null,
+          arrivalTime: arr.time || null,
+          estimatedDepartureTime: null,
+          estimatedArrivalTime: null,
+          departureTerminal: flight.dep_terminal || null,
+          arrivalTerminal: flight.arr_terminal || null,
+          departureGate: flight.dep_gate || null,
+          arrivalGate: flight.arr_gate || null,
+          arrivalBaggage: null,
           status: "scheduled",
         };
       }
 
-      // Otherwise, parse normally if it matches or has no time conflict
-      const parseDateTimeParts = (dateTimeStr: string | null) => {
-        if (!dateTimeStr) return { date: null, time: null };
-        const [datePart, timePart] = dateTimeStr.split(" ");
-        return {
-          date: datePart || null,
-          time: timePart || null,
-        };
-      };
+      // --- Precise Calculation using AirLabs Epoch Timestamps (_ts) ---
+      const depTimestamp = flight.dep_time_ts || 0;
+      const estDepTimestamp = flight.dep_estimated_ts || depTimestamp;
+
+      const hoursUntilDeparture = depTimestamp
+        ? (depTimestamp - nowUnixSeconds) / 3600
+        : 999;
+
+      let calculatedStatus = "scheduled";
+
+      if (hoursUntilDeparture > 10) {
+        calculatedStatus = "scheduled";
+      } else if (hoursUntilDeparture <= 10 && hoursUntilDeparture >= 0) {
+        if (!estDepTimestamp || estDepTimestamp === depTimestamp) {
+          calculatedStatus = "on-time";
+        } else if (estDepTimestamp > depTimestamp) {
+          calculatedStatus = "delay";
+        } else {
+          calculatedStatus = "early";
+        }
+      } else if (flight.status === "landed") {
+        calculatedStatus = "landed";
+      } else if (flight.status === "en-route") {
+        calculatedStatus = "en-route";
+      }
 
       const dep = parseDateTimeParts(flight.dep_time);
       const arr = parseDateTimeParts(flight.arr_time);
+      const depEst = parseDateTimeParts(flight.dep_estimated);
+      const arrEst = parseDateTimeParts(flight.arr_estimated);
 
       return {
         flightNumber: flight.flight_iata || flightNumber,
@@ -53,16 +93,26 @@ async function fetchFlightStatus(flightNumber: string, userFlightDate: string) {
           flight.airline_name || flight.airline_iata || "Scheduled Flight",
         departureAirport: flight.dep_iata || "TBD",
         arrivalAirport: flight.arr_iata || "TBD",
-        departureDate: flight.dep_time ? dep.date : null,
-        arrivalDate: flight.arr_time ? arr.date : null,
-        departureTime: flight.dep_time ? dep.time : null,
-        arrivalTime: flight.arr_time ? arr.time : null,
-        status: flight.status || "scheduled",
+        departureDate: userFlightDate,
+        arrivalDate: arr.date || null,
+        departureTime: dep.time || null,
+        arrivalTime: arr.time || null,
+        estimatedDepartureTime: depEst.time || null,
+        estimatedArrivalTime: arrEst.time || null,
+        departureTerminal: flight.dep_terminal || null,
+        arrivalTerminal: flight.arr_terminal || null,
+        departureGate: flight.dep_gate || null,
+        arrivalGate: flight.arr_gate || null,
+        arrivalBaggage:
+          calculatedStatus === "en-route" || calculatedStatus === "landed"
+            ? flight.arr_baggage || null
+            : null,
+        status: calculatedStatus,
       };
     }
   }
 
-  // Fallback if live data isn't available
+  // Fallback if live flight data isn't available
   return {
     flightNumber: flightNumber,
     airline: "Scheduled Flight",
@@ -72,6 +122,13 @@ async function fetchFlightStatus(flightNumber: string, userFlightDate: string) {
     arrivalDate: null,
     departureTime: null,
     arrivalTime: null,
+    estimatedDepartureTime: null,
+    estimatedArrivalTime: null,
+    departureTerminal: null,
+    arrivalTerminal: null,
+    departureGate: null,
+    arrivalGate: null,
+    arrivalBaggage: null,
     status: "scheduled",
   };
 }
@@ -102,7 +159,7 @@ export async function addFlight(formData: FormData, tripId: string) {
     arrivalDate: flightDetails.arrivalDate,
     status: flightDetails.status,
     trip: {
-      connect: { id: tripId }, // <-- Changed from tripId: tripId to this relation connect
+      connect: { id: tripId },
     },
   };
 
