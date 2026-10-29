@@ -39,7 +39,7 @@
 
 "use client";
 
-import { Location } from "@/app/generated/prisma";
+import { Location } from "@/app/generated/prisma/client";
 import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
 
 interface MapProps {
@@ -55,7 +55,7 @@ export default function ItineraryMap({ itineraries }: MapProps) {
   return (
     <div style={{ width: "100%", height: "400px" }}>
       <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-        <Map center={center} zoom={8}>
+        <Map defaultCenter={center} defaultZoom={12} gestureHandling="greedy">
           {itineraries.map((location, key) => (
             <Marker
               key={key}
