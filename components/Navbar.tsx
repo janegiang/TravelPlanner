@@ -7,44 +7,54 @@ import { Session } from "next-auth";
 
 export default function Navbar({ session }: { session: Session | null }) {
   return (
-    <nav className="bg-white shadow-md py-4 border-b border-gray-200">
-      {" "}
-      <div className="container mx-auto flex justify-between items-center px-6 lg:px-8">
-        <Link href={"/"} className="flex items-center">
-          <Image src={"/logo(1).png"} alt="logo" width={50} height={50} />
-          <span className="text-2xl font-bold text-gray-800">
-            {" "}
-            Trip Planner{" "}
+    <nav className="sticky top-0 z-50 bg-brand-gold backdrop-blur-md shadow-sm border-b border-border">
+      <div className="container mx-auto flex justify-between items-center px-6 lg:px-8 py-3">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="Trip Planner logo"
+            width={48}
+            height={48}
+          />
+          <span className="text-2xl font-bold text-foreground tracking-tight">
+            Trip Planner
           </span>
         </Link>
-        <div className="flex items-center space-x-4">
+
+        {/* Navigation */}
+        <div className="flex items-center gap-5">
           {session ? (
             <>
               <Link
-                href={"/trips"}
-                className="text-slate-900 hover:text-sky-500"
+                href="/trips"
+                className="font-medium text-foreground hover:text-brand-orange transition-colors"
               >
                 My Trips
               </Link>
-              <Link href={"/map"} className="text-slate-900 hover:text-sky-500">
+
+              <Link
+                href="/map"
+                className="font-medium text-foreground hover:text-brand-orange transition-colors"
+              >
                 Map
               </Link>
 
               <button
-                className="flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white p-2 rounded-sm cursor-pointer"
                 onClick={logout}
+                className="flex items-center justify-center bg-brand-olive hover:bg-[#8e8d43] text-white px-4 py-2 rounded-lg font-medium transition-all cursor-pointer shadow-sm"
               >
                 Sign Out
               </button>
             </>
           ) : (
             <button
-              className="flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white p-2 rounded-sm cursor-pointer"
               onClick={login}
+              className="flex items-center justify-center gap-2 bg-brand-olive hover:bg-[#595824] text-white px-4 py-2.5 rounded-lg font-medium transition-all cursor-pointer shadow-sm"
             >
               Sign In
               <svg
-                className="w-6 h-6 ml-2"
+                className="w-5 h-5"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
