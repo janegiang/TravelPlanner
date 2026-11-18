@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 @import "uploadthing/tw/v4";
-@source "../node_modules/@uploadthing/react/dist"; /** <-- depends on your project structure */
+@source "../node_modules/@uploadthing/react/dist";
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -24,51 +25,74 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Custom Retro Brand Palette */
+  --color-brand-olive: #8e8d43;
+  --color-brand-cream: #fef2d0;
+  --color-brand-gold: #f9b054;
+  --color-brand-orange: #e06f1f;
+  --color-brand-ink: #1f1c14;
 }
 
 :root {
-  --radius: 0.625rem;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --radius: 0.75rem;
+
+  /* Light Mode - Warm Retro Palette with High Contrast */
+  --background: #fffcf4; /* Lighter warm tint so #fef2d0 cards/sections stand out */
+  --foreground: #1f1c14; /* Deep espresso ink for crisp contrast */
+
+  --card: #c9c88d;
+  --card-foreground: #1f1c14;
+
+  --primary: #e06f1f; /* Burnt Orange primary buttons */
+  --primary-foreground: #ffffff;
+
+  --secondary: #fef2d0; /* Soft Cream section backgrounds */
+  --secondary-foreground: #1f1c14;
+
+  --muted: #fef2d0;
+  --muted-foreground: #5c5646;
+
+  --accent: #f9b054; /* Warm Gold highlights */
+  --accent-foreground: #1f1c14;
+
+  --destructive: #dc2626;
+  --border: #eae1ce; /* Warm tan border */
+  --input: #e5d8b5;
+  --ring: #e06f1f;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  /* Dark Mode - Rich Espresso & Warm Accents */
+  --background: #17150f;
+  --foreground: #fef2d0;
+
+  --card: #221f17;
+  --card-foreground: #fef2d0;
+
+  --primary: #e06f1f;
+  --primary-foreground: #ffffff;
+
+  --secondary: #2b271d;
+  --secondary-foreground: #fef2d0;
+
+  --muted: #2b271d;
+  --muted-foreground: #c7bca1;
+
+  --accent: #8e8d43;
+  --accent-foreground: #17150f;
+
+  --destructive: #f87171;
+  --border: #3d3729;
+  --input: #3d3729;
+  --ring: #fecb70;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
