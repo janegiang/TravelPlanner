@@ -12,7 +12,7 @@ export default function Navbar({ session }: { session: Session | null }) {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/logo.png"
+            src="/logo(1).png"
             alt="Trip Planner logo"
             width={48}
             height={48}
