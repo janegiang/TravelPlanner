@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-import { Nunito, Geist_Mono } from "next/font/google";
+import { Nunito, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { auth } from "@/auth";
+import { cn } from "@/lib/utils";
 
-const nunito = Nunito({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -29,7 +27,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${nunito.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn("h-full", "antialiased", geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">
         <Navbar session={session} />

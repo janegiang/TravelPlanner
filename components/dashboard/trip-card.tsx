@@ -50,8 +50,6 @@ export default function TripCard({
   trip: DashboardTrip;
   status: TripStatus;
 }) {
-  const destination = trip.locations[0]?.locationTitle || "Your adventure";
-
   const duration = getTripDuration(trip.startDate, trip.endDate);
 
   return (
@@ -92,11 +90,6 @@ export default function TripCard({
             </h3>
 
             <ArrowUpRight className="h-5 w-5 shrink-0 text-brand-orange transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-          </div>
-
-          <div className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">{destination}</span>
           </div>
 
           <p className="mb-5 line-clamp-2 flex-1 text-sm leading-relaxed text-foreground/75">

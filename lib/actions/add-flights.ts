@@ -1,180 +1,249 @@
 "use server";
 
 import { auth } from "@/auth";
-import { prisma } from "../prisma";
-import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
-async function fetchFlightStatus(flightNumber: string, userFlightDate: string) {
-  const apiKey = process.env.AIRLABS_API_KEY;
-  const response = await fetch(
-    `https://airlabs.co/api/v9/flight?flight_iata=${flightNumber}&api_key=${apiKey}`,
-  );
+import { revalidatePath } from "next/cache";
 
-  const data = await response.json();
-  const nowUnixSeconds = Math.floor(Date.now() / 1000); // Current time in epoch seconds
+import {
+  lookupFlight,
+  normalizeFlightNumber,
+  validateFlightDate,
+} from "@/lib/flight-lookup";
 
-  const parseDateTimeParts = (dateTimeStr: string | null) => {
-    if (!dateTimeStr) return { date: null, time: null };
-    const [datePart, timePart] = dateTimeStr.split(" ");
-    return { date: datePart || null, time: timePart || null };
-  };
-
-  if (data && data.response) {
-    const flight = Array.isArray(data.response)
-      ? data.response[0]
-      : data.response;
-
-    if (flight) {
-      // Use local airport time string for date matching to avoid UTC timezone shifts
-      const depDateString = flight.dep_time
-        ? flight.dep_time.split(" ")[0]
-        : null;
-
-      // 1. SAFETY CHECK: Compare local-derived date with user input date
-      if (!depDateString || depDateString !== userFlightDate) {
-        const arr = parseDateTimeParts(flight.arr_time);
-        const dep = parseDateTimeParts(flight.dep_time);
-
-        return {
-          flightNumber: flight.flight_iata || flightNumber,
-          airline:
-            flight.airline_name || flight.airline_iata || "Scheduled Flight",
-          departureAirport: flight.dep_iata || "TBD",
-          arrivalAirport: flight.arr_iata || "TBD",
-          departureDate: userFlightDate,
-          arrivalDate: arr.date || null,
-          departureTime: dep.time || null,
-          arrivalTime: arr.time || null,
-          estimatedDepartureTime: null,
-          estimatedArrivalTime: null,
-          departureTerminal: flight.dep_terminal || null,
-          arrivalTerminal: flight.arr_terminal || null,
-          departureGate: flight.dep_gate || null,
-          arrivalGate: flight.arr_gate || null,
-          arrivalBaggage: null,
-          status: "scheduled",
-        };
-      }
-
-      // --- Precise Calculation using AirLabs Epoch Timestamps (_ts) ---
-      const depTimestamp = flight.dep_time_ts || 0;
-      const estDepTimestamp = flight.dep_estimated_ts || depTimestamp;
-
-      const hoursUntilDeparture = depTimestamp
-        ? (depTimestamp - nowUnixSeconds) / 3600
-        : 999;
-
-      let calculatedStatus = "scheduled";
-
-      if (hoursUntilDeparture > 10) {
-        calculatedStatus = "scheduled";
-      } else if (hoursUntilDeparture <= 10 && hoursUntilDeparture >= 0) {
-        if (!estDepTimestamp || estDepTimestamp === depTimestamp) {
-          calculatedStatus = "on-time";
-        } else if (estDepTimestamp > depTimestamp) {
-          calculatedStatus = "delay";
-        } else {
-          calculatedStatus = "early";
-        }
-      } else if (flight.status === "landed") {
-        calculatedStatus = "landed";
-      } else if (flight.status === "en-route") {
-        calculatedStatus = "en-route";
-      }
-
-      const dep = parseDateTimeParts(flight.dep_time);
-      const arr = parseDateTimeParts(flight.arr_time);
-      const depEst = parseDateTimeParts(flight.dep_estimated);
-      const arrEst = parseDateTimeParts(flight.arr_estimated);
-
-      return {
-        flightNumber: flight.flight_iata || flightNumber,
-        airline:
-          flight.airline_name || flight.airline_iata || "Scheduled Flight",
-        departureAirport: flight.dep_iata || "TBD",
-        arrivalAirport: flight.arr_iata || "TBD",
-        departureDate: userFlightDate,
-        arrivalDate: arr.date || null,
-        departureTime: dep.time || null,
-        arrivalTime: arr.time || null,
-        estimatedDepartureTime: depEst.time || null,
-        estimatedArrivalTime: arrEst.time || null,
-        departureTerminal: flight.dep_terminal || null,
-        arrivalTerminal: flight.arr_terminal || null,
-        departureGate: flight.dep_gate || null,
-        arrivalGate: flight.arr_gate || null,
-        arrivalBaggage:
-          calculatedStatus === "en-route" || calculatedStatus === "landed"
-            ? flight.arr_baggage || null
-            : null,
-        status: calculatedStatus,
-      };
-    }
-  }
-
-  // Fallback if live flight data isn't available
-  return {
-    flightNumber: flightNumber,
-    airline: "Scheduled Flight",
-    departureAirport: "TBD",
-    arrivalAirport: "TBD",
-    departureDate: userFlightDate,
-    arrivalDate: null,
-    departureTime: null,
-    arrivalTime: null,
-    estimatedDepartureTime: null,
-    estimatedArrivalTime: null,
-    departureTerminal: null,
-    arrivalTerminal: null,
-    departureGate: null,
-    arrivalGate: null,
-    arrivalBaggage: null,
-    status: "scheduled",
-  };
-}
+// ======================================
+// ADD FLIGHT
+// ======================================
 
 export async function addFlight(formData: FormData, tripId: string) {
+  // ======================================
+  // 1. AUTHENTICATION
+  // ======================================
+
   const session = await auth();
-  if (!session) {
-    throw new Error("Not authenticated");
+
+  if (!session?.user?.id) {
+    throw new Error("You must be signed in to add a flight.");
   }
 
-  const flightNumber = formData.get("flightNumber")?.toString();
-  const userFlightDate = formData.get("userFlightDate")?.toString();
+  // ======================================
+  // 2. VALIDATE TRIP ID
+  // ======================================
 
-  if (!flightNumber || !userFlightDate) {
-    throw new Error("Missing flight number or date");
+  if (typeof tripId !== "string" || !tripId.trim()) {
+    throw new Error("Invalid trip.");
   }
 
-  const flightDetails = await fetchFlightStatus(flightNumber, userFlightDate);
+  // ======================================
+  // 3. VERIFY TRIP OWNERSHIP
+  // ======================================
 
-  const safeData = {
-    flightNumber: flightDetails.flightNumber,
-    airline: flightDetails.airline,
-    departureAirport: flightDetails.departureAirport,
-    arrivalAirport: flightDetails.arrivalAirport,
-    departureTime: flightDetails.departureTime,
-    arrivalTime: flightDetails.arrivalTime,
-    departureDate: flightDetails.departureDate,
-    arrivalDate: flightDetails.arrivalDate,
-    status: flightDetails.status,
-    trip: {
-      connect: { id: tripId },
+  const trip = await prisma.trip.findFirst({
+    where: {
+      id: tripId,
+      userId: session.user.id,
     },
-  };
+    select: {
+      id: true,
+    },
+  });
 
-  try {
-    console.log("Inserting clean flight data into DB:", safeData);
+  if (!trip) {
+    throw new Error("Trip not found or access denied.");
+  }
 
-    const newFlight = await prisma.flight.create({
-      data: safeData,
+  // ======================================
+  // 4. READ FORM VALUES
+  // ======================================
+
+  const rawFlightNumber = formData.get("flightNumber");
+
+  const rawFlightDate = formData.get("userFlightDate");
+
+  if (
+    typeof rawFlightNumber !== "string" ||
+    typeof rawFlightDate !== "string"
+  ) {
+    throw new Error("Please enter a flight number and departure date.");
+  }
+
+  // ======================================
+  // 5. VALIDATE INPUT
+  // ======================================
+
+  const flightNumber = normalizeFlightNumber(rawFlightNumber);
+
+  const departureDate = validateFlightDate(rawFlightDate);
+
+  // ======================================
+  // 6. PREVENT DUPLICATE FLIGHTS
+  // ======================================
+
+  const existingFlight = await prisma.flight.findFirst({
+    where: {
+      tripId,
+      flightNumber: {
+        equals: flightNumber,
+        mode: "insensitive",
+      },
+      departureDate,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (existingFlight) {
+    throw new Error("This flight has already been added to your trip.");
+  }
+
+  // ======================================
+  // 7. LOOK UP FLIGHT DETAILS
+  // ======================================
+
+  // Preserve existing Add Flight behavior:
+  // If AirLabs returns no matching flight,
+  // save a placeholder record.
+  //
+  // API/network errors still throw an error.
+  //
+  // lookupFlight calculates the flight status
+  // using AirLabs timestamps, including
+  // whether the expected arrival has passed.
+
+  const flightDetails = await lookupFlight(flightNumber, departureDate, {
+    allowFallback: true,
+  });
+
+  // ======================================
+  // 7A. DETERMINE STATUS WHEN ADDING
+  // ======================================
+
+  // A matching flight whose arrival time
+  // has passed is returned as Completed
+  // by lookupFlight().
+  //
+  // Preserve all other calculated statuses.
+  //
+  // Do not mark unmatched placeholder flights
+  // as Completed because their arrival time
+  // is unknown.
+
+  const flightStatus =
+    flightDetails.status === "completed" ? "completed" : flightDetails.status;
+
+  // ======================================
+  // 8. RECHECK DUPLICATES AND OWNERSHIP
+  // ======================================
+
+  // Recheck inside a transaction to reduce
+  // the chance of duplicate records from
+  // rapid submissions.
+
+  await prisma.$transaction(async (tx) => {
+    const ownedTrip = await tx.trip.findFirst({
+      where: {
+        id: tripId,
+        userId: session.user.id,
+      },
+      select: {
+        id: true,
+      },
     });
 
-    console.log("Successfully created flight:", newFlight);
-  } catch (error) {
-    console.error("CRITICAL ERROR IN addFlight:", error);
-    throw error;
-  }
+    if (!ownedTrip) {
+      throw new Error("Trip not found or access denied.");
+    }
 
-  redirect(`/trips/${tripId}`);
+    const duplicate = await tx.flight.findFirst({
+      where: {
+        tripId,
+        flightNumber: {
+          equals: flightNumber,
+          mode: "insensitive",
+        },
+        departureDate,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (duplicate) {
+      throw new Error("This flight has already been added to your trip.");
+    }
+
+    // ======================================
+    // 9. SAVE FLIGHT
+    // ======================================
+
+    await tx.flight.create({
+      data: {
+        flightNumber: flightDetails.flightNumber,
+
+        airline: flightDetails.airline,
+
+        // ======================================
+        // DEPARTURE INFORMATION
+        // ======================================
+
+        departureAirport: flightDetails.departureAirport,
+
+        departureDate: flightDetails.departureDate,
+
+        departureTime: flightDetails.departureTime,
+
+        // Departure terminal and gate
+        departureTerminal: flightDetails.departureTerminal,
+
+        departureGate: flightDetails.departureGate,
+
+        // ======================================
+        // ARRIVAL INFORMATION
+        // ======================================
+
+        arrivalAirport: flightDetails.arrivalAirport,
+
+        arrivalDate: flightDetails.arrivalDate,
+
+        arrivalTime: flightDetails.arrivalTime,
+
+        // Arrival terminal and gate
+        arrivalTerminal: flightDetails.arrivalTerminal,
+
+        arrivalGate: flightDetails.arrivalGate,
+
+        // ======================================
+        // FLIGHT STATUS
+        // ======================================
+
+        // Save Completed immediately when
+        // lookupFlight confirms that the
+        // matching flight's arrival time
+        // has already passed.
+
+        status: flightStatus,
+
+        tripId,
+      },
+    });
+  });
+
+  // ======================================
+  // 10. REFRESH TRIP DATA
+  // ======================================
+
+  revalidatePath(`/trips/${tripId}`);
+
+  // ======================================
+  // 11. RETURN SUCCESS
+  // ======================================
+
+  // Do not call redirect() here.
+  // The client component will navigate after
+  // the server action completes successfully.
+
+  return {
+    success: true,
+  };
 }

@@ -81,7 +81,7 @@ export default function TripSort({ defaultValue }: TripSortProps) {
         aria-expanded={isOpen}
         aria-controls="trip-sort-options"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-12 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-brand-olive focus:outline-none focus:ring-2 focus:ring-primary/20"
+        className="flex h-12 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:border-brand-olive focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
       >
         <span className="flex min-w-0 items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -111,7 +111,7 @@ export default function TripSort({ defaultValue }: TripSortProps) {
               className={`flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
                 selected === option.value
                   ? "bg-brand-olive font-bold text-white"
-                  : "text-foreground hover:bg-secondary"
+                  : "text-foreground hover:bg-brand-gold"
               }`}
             >
               {option.label}

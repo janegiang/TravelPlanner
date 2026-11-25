@@ -28,21 +28,14 @@ export default function Navbar({ session }: { session: Session | null }) {
             <>
               <Link
                 href="/trips"
-                className="font-medium text-foreground hover:text-brand-orange transition-colors"
+                className="font-medium text-foreground hover:text-white transition-colors"
               >
                 My Trips
               </Link>
 
-              <Link
-                href="/map"
-                className="font-medium text-foreground hover:text-brand-orange transition-colors"
-              >
-                Map
-              </Link>
-
               <button
                 onClick={logout}
-                className="flex items-center justify-center bg-brand-olive hover:bg-[#8e8d43] text-white px-4 py-2 rounded-lg font-medium transition-all cursor-pointer shadow-sm"
+                className="flex items-center justify-center gap-2 bg-brand-olive hover:bg-[#595824] text-white px-4 py-2.5 rounded-lg font-medium transition-all cursor-pointer shadow-sm"
               >
                 Sign Out
               </button>

@@ -298,7 +298,7 @@ export default async function TripPage({
     });
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="flex min-h-screen flex-col items-center bg-brand-cream">
       <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         {/* DASHBOARD HEADER */}
         <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
@@ -320,7 +320,7 @@ export default async function TripPage({
 
           <Link
             href="/trips/new"
-            className="inline-flex w-fit items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
+            className="inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-brand-orange hover:bg-brand-orange/85 px-3 py-3 font-bold text-white shadow-sm transition-opacity hover:opacity-90"
           >
             <Plus className="h-5 w-5" />
             New Trip
@@ -356,7 +356,7 @@ export default async function TripPage({
 
               <Link
                 href="/trips/new"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-primary-foreground transition-opacity hover:opacity-90"
+                className="inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-brand-orange hover:bg-brand-orange/85 px-3 py-3 font-bold text-white shadow-sm transition-opacity hover:opacity-90"
               >
                 <Plus className="h-5 w-5" />
                 Create New Trip
@@ -406,7 +406,7 @@ export default async function TripPage({
                 className={`shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${
                   filter === item.value
                     ? "bg-brand-olive text-white shadow-sm"
-                    : "border border-border bg-card text-card-foreground hover:bg-secondary"
+                    : "border border-border bg-card text-card-foreground hover:bg-brand-gold"
                 }`}
               >
                 {item.label}
@@ -503,14 +503,14 @@ export default async function TripPage({
               {search || total > 0 ? (
                 <Link
                   href="/trips"
-                  className="rounded-xl bg-secondary px-5 py-3 font-bold text-secondary-foreground hover:opacity-80"
+                  className="inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-brand-orange hover:bg-brand-orange/85 px-3 py-3 font-bold text-white shadow-sm transition-opacity hover:opacity-90"
                 >
                   View All Trips
                 </Link>
               ) : (
                 <Link
                   href="/trips/new"
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 font-bold text-primary-foreground"
+                  className="inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-brand-orange hover:bg-brand-orange/85 px-3 py-3 font-bold text-white shadow-sm transition-opacity hover:opacity-90"
                 >
                   <Plus className="h-4 w-4" />
                   Create Your First Trip
