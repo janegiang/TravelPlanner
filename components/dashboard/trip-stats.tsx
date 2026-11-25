@@ -59,15 +59,15 @@ export default function TripStats({
           >
             <div className="mb-4 flex items-center justify-between gap-2">
               <div className={`rounded-xl p-2.5 ${stat.background}`}>
-                <Icon className={`h-5 w-5 ${stat.color}`} />
+                <Icon className={`h-5 w-5 rounded-xl ${stat.color}`} />
               </div>
             </div>
 
-            <p className="text-3xl font-black tracking-tight sm:text-4xl">
+            <p className="text-3xl font-black tracking-tight sm:text-4xl text-center">
               {stat.value}
             </p>
 
-            <p className="mt-1 text-sm font-semibold text-foreground/75">
+            <p className="mt-1 text-sm font-semibold text-foreground/75 text-center">
               {stat.label}
             </p>
           </div>

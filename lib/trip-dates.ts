@@ -1,77 +1,3 @@
-// export type TripStatus = "upcoming" | "ongoing" | "completed";
-
-// const DAY_MS = 24 * 60 * 60 * 1000;
-
-// export function getTodayUTC(): Date {
-//   const now = new Date();
-
-//   // Treat trips as calendar dates, not exact departure timestamps.
-//   return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-// }
-
-// export function getTomorrowUTC(): Date {
-//   return new Date(getTodayUTC().getTime() + DAY_MS);
-// }
-
-// export function getTripStatus(
-//   startDate: Date | string,
-//   endDate: Date | string,
-//   today = getTodayUTC(),
-// ): TripStatus {
-//   const start = new Date(startDate);
-//   const end = new Date(endDate);
-
-//   if (start > today) return "upcoming";
-//   if (end < today) return "completed";
-
-//   return "ongoing";
-// }
-
-// export function formatTripDate(
-//   date: Date | string,
-//   options?: Intl.DateTimeFormatOptions,
-// ): string {
-//   return new Intl.DateTimeFormat("en-US", {
-//     month: "short",
-//     day: "numeric",
-//     year: "numeric",
-//     timeZone: "UTC",
-//     ...options,
-//   }).format(new Date(date));
-// }
-
-// export function getTripDuration(
-//   startDate: Date | string,
-//   endDate: Date | string,
-// ): number {
-//   const start = new Date(startDate).getTime();
-//   const end = new Date(endDate).getTime();
-
-//   return Math.max(1, Math.round((end - start) / DAY_MS) + 1);
-// }
-
-// export function getDaysUntil(
-//   date: Date | string,
-//   today = getTodayUTC(),
-// ): number {
-//   return Math.max(
-//     0,
-//     Math.round((new Date(date).getTime() - today.getTime()) / DAY_MS),
-//   );
-// }
-
-// export function getCountdownLabel(
-//   date: Date | string,
-//   today = getTodayUTC(),
-// ): string {
-//   const days = getDaysUntil(date, today);
-
-//   if (days === 0) return "Starting today";
-//   if (days === 1) return "Tomorrow";
-
-//   return `In ${days} days`;
-// }
-
 export type TripStatus = "upcoming" | "ongoing" | "completed";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -91,26 +17,10 @@ export function normalizeUTCDate(date: Date | string): Date {
 /**
  * Get today's date at midnight UTC.
  */
-
 export function getTodayUTC(): Date {
-  const today = new Date();
+  const now = new Date();
 
-  const localDate = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Los_Angeles",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-
-  const parts = localDate.formatToParts(today);
-
-  const year = Number(parts.find((part) => part.type === "year")?.value);
-
-  const month = Number(parts.find((part) => part.type === "month")?.value);
-
-  const day = Number(parts.find((part) => part.type === "day")?.value);
-
-  return new Date(Date.UTC(year, month - 1, day));
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
 }
 
 /**

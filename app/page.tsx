@@ -11,11 +11,11 @@ export default async function Home() {
   }
 
   return (
-    <main className="flex flex-col items-center bg-brand-cream">
+    <main className="flex min-h-screen flex-col items-center bg-brand-cream">
       {/* Hero Section */}
-      <section className="w-full border-border py-16 md:py-24 px-4">
+      <section className="w-full py-16 px-4 md:py-24">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
             Your Next Journey Starts Here
           </h1>
 
@@ -28,7 +28,7 @@ export default async function Home() {
             <form action={login}>
               <button
                 type="submit"
-                className="rounded-lg bg-brand-olive hover:bg-[#595824] text-white px-8 py-3.5 font-semibold transition-colors cursor-pointer shadow-md"
+                className="rounded-lg bg-brand-orange hover:bg-brand-orange/85 text-white px-8 py-3.5 font-semibold transition-colors cursor-pointer shadow-md"
               >
                 Begin Your Journey
               </button>
@@ -43,7 +43,7 @@ export default async function Home() {
         className="w-full max-w-5xl px-4 py-12 border-t border-border mb-16"
       >
         <div className="text-center mb-10 space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+          <h2 className="text-3xl font-bold tracking-tight text-brand-ink">
             Everything You Need for Your Trip
           </h2>
           <p className="text-muted-foreground">
@@ -55,7 +55,7 @@ export default async function Home() {
           {/* Feature 1 */}
           <div className="p-6 rounded-xl bg-card border-2 border-border hover:border-brand-gold hover:shadow-md transition-all">
             <h3 className="font-bold text-lg mb-2 text-card-foreground">
-              🗺️ Interactive Maps
+              🗾 Interactive Maps
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Pin destinations, visualize routes, and organize locations for
@@ -170,7 +170,7 @@ export default async function Home() {
             <form action={login}>
               <button
                 type="submit"
-                className="rounded-lg bg-brand-gold hover:bg-[#f6be58] px-8 py-3.5 text-brand-ink font-bold transition-colors cursor-pointer shadow-md"
+                className="rounded-lg bg-brand-gold hover:bg-brand-gold/85 px-8 py-3.5 text-brand-ink font-semibold transition-colors cursor-pointer shadow-md"
               >
                 Sign In to Start →
               </button>

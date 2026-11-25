@@ -1,8 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+ // This is your Prisma schema file,
+ // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+ // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+ // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client"
@@ -51,7 +52,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid()) 
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -87,29 +88,43 @@ model Trip{
 }
 
 model Location {
-  id String @id @default(cuid())
+  id            String   @id @default(cuid())
   locationTitle String
-  lat Float
-  lng Float
-  trip Trip @relation(fields: [tripId], references: [id])
-  tripId String
-  order Int @default(0)
-  createdAt DateTime @default(now())
+  dayNumber     Int?
+  startTime     String?
+  notes         String?
+  lat           Float
+  lng           Float
+
+  trip          Trip     @relation(fields: [tripId], references: [id])
+  tripId        String
+
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
 }
 
 model Flight {
-  id             String   @id @default(cuid())
-  flightNumber   String   
-  airline        String
-  departureAirport String
-  departureDate  String
-  departureTime  String?
-  arrivalAirport   String
-  arrivalDate    String?
-  arrivalTime    String?
-  status         String
-  trip           Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  tripId         String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                String   @id @default(cuid())
+  flightNumber      String
+  airline           String
+
+  departureAirport  String
+  departureDate     String
+  departureTime     String?
+  departureTerminal String?
+  departureGate     String?
+
+  arrivalAirport    String
+  arrivalDate       String?
+  arrivalTime       String?
+  arrivalTerminal   String?
+  arrivalGate       String?
+
+  status            String
+
+  trip              Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId            String
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
