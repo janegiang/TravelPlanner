@@ -25,6 +25,11 @@ export async function updateFlight(
   // ======================================
 
   const session = await auth();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    throw new Error("Not authenticated.");
+  }
 
   if (!session?.user?.id) {
     throw new Error("You must be signed in to edit a flight.");
@@ -136,7 +141,7 @@ export async function updateFlight(
         id: flightId,
         tripId,
         trip: {
-          userId: session.user.id,
+          userId,
         },
       },
       select: {

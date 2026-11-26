@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   CalendarDays,
   MapPin,
@@ -19,6 +19,16 @@ import {
   getCurrentTripDay,
   getTodayUTC,
 } from "@/lib/trip-dates";
+
+const subscribe = () => () => {};
+
+function useIsClient() {
+  return useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
+}
 
 interface TripStatsProps {
   trip: Trip & {
@@ -55,11 +65,8 @@ function StatCard({ title, value, description, icon: Icon }: StatCardProps) {
 }
 
 export default function TripStats({ trip }: TripStatsProps) {
-  const [today, setToday] = useState<Date | null>(null);
-
-  useEffect(() => {
-    setToday(getTodayUTC());
-  }, []);
+  const isClient = useIsClient();
+  const today = isClient ? getTodayUTC() : null;
 
   const duration = getTripDuration(trip.startDate, trip.endDate);
 

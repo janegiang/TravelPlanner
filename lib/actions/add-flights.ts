@@ -21,8 +21,9 @@ export async function addFlight(formData: FormData, tripId: string) {
   // ======================================
 
   const session = await auth();
+  const userId = session?.user?.id;
 
-  if (!session?.user?.id) {
+  if (!userId) {
     throw new Error("You must be signed in to add a flight.");
   }
 
@@ -41,7 +42,7 @@ export async function addFlight(formData: FormData, tripId: string) {
   const trip = await prisma.trip.findFirst({
     where: {
       id: tripId,
-      userId: session.user.id,
+      userId,
     },
     select: {
       id: true,
@@ -144,7 +145,7 @@ export async function addFlight(formData: FormData, tripId: string) {
     const ownedTrip = await tx.trip.findFirst({
       where: {
         id: tripId,
-        userId: session.user.id,
+        userId,
       },
       select: {
         id: true,

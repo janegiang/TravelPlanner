@@ -61,10 +61,18 @@ export default function LocationAutocomplete({
 
         if (currentRequest !== requestId.current) return;
 
-        const results: PlaceSuggestion[] = response.suggestions
-          .filter((item) => item.placePrediction)
+        const results: PlaceSuggestion[] = (
+          response.suggestions as google.maps.places.AutocompleteSuggestion[]
+        )
+          .filter(
+            (
+              item,
+            ): item is google.maps.places.AutocompleteSuggestion & {
+              placePrediction: google.maps.places.PlacePrediction;
+            } => item.placePrediction != null,
+          )
           .map((item) => {
-            const prediction = item.placePrediction!;
+            const prediction = item.placePrediction;
 
             return {
               placeId: prediction.placeId,

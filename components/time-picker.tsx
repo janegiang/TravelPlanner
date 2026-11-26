@@ -59,7 +59,7 @@ function formatDisplay(value: string) {
   return `${Number(hour)}:${minute} ${period}`;
 }
 
-export default function TimePicker({
+function TimePickerContent({
   id,
   name,
   disabled = false,
@@ -94,15 +94,15 @@ export default function TimePicker({
     };
   }, []);
 
-  // Synchronize with an updated default value.
-  useEffect(() => {
-    const parsed = parseTime(defaultValue);
+  // // Synchronize with an updated default value.
+  // useEffect(() => {
+  //   const parsed = parseTime(defaultValue);
 
-    setValue(defaultValue);
-    setHour(parsed.hour);
-    setMinute(parsed.minute);
-    setPeriod(parsed.period);
-  }, [defaultValue]);
+  //   setValue(defaultValue);
+  //   setHour(parsed.hour);
+  //   setMinute(parsed.minute);
+  //   setPeriod(parsed.period);
+  // }, [defaultValue]);
 
   function handleApply() {
     setValue(convertTo24Hour(hour, minute, period));
@@ -252,4 +252,8 @@ export default function TimePicker({
       )}
     </div>
   );
+}
+
+export default function TimePicker(props: TimePickerProps) {
+  return <TimePickerContent key={props.defaultValue ?? ""} {...props} />;
 }

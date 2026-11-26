@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 
 import {
@@ -471,7 +471,7 @@ function DaySection({
 // MAIN ITINERARY COMPONENT
 // ======================================
 
-export default function SortableItinerary({
+function SortableItineraryContent({
   locations,
   tripId,
   startDate,
@@ -506,14 +506,6 @@ export default function SortableItinerary({
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // ======================================
-  // SYNC SERVER DATA
-  // ======================================
-
-  useEffect(() => {
-    setLocalLocations(preserveManualOrder(locations, duration));
-  }, [locations, duration]);
 
   // ======================================
   // DRAG SENSORS
@@ -1047,5 +1039,23 @@ export default function SortableItinerary({
         />
       )}
     </div>
+  );
+}
+
+export default function SortableItinerary(props: SortableItineraryProps) {
+  const locationsKey = JSON.stringify(
+    props.locations.map((location) => ({
+      id: location.id,
+      dayNumber: location.dayNumber,
+      order: location.order,
+      startTime: location.startTime,
+    })),
+  );
+
+  return (
+    <SortableItineraryContent
+      key={`${props.tripId}-${props.startDate}-${props.endDate}-${locationsKey}`}
+      {...props}
+    />
   );
 }
