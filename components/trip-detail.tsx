@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -29,7 +29,6 @@ import { formatTripDate, getTripDuration } from "@/lib/trip-dates";
 import { refreshFlight } from "@/lib/actions/refresh-flight";
 
 import TripHeader from "@/components/trip-header";
-import TripStats from "@/components/trip-stats";
 import TripActivityPreview from "@/components/trip-activity-preview";
 import Map from "@/components/map";
 import SortableItinerary from "@/components/sortable-itinerary";
@@ -136,6 +135,15 @@ function getTripCountdown(startDate: Date, endDate: Date): string {
 // ======================================
 // MAIN TRIP DETAIL COMPONENT
 // ======================================
+const subscribe = () => () => {};
+
+function useIsClient() {
+  return useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
+}
 
 export default function TripDetailClient({ trip }: TripDetailClientProps) {
   const router = useRouter();
@@ -152,7 +160,7 @@ export default function TripDetailClient({ trip }: TripDetailClientProps) {
     ? requestedTab
     : "overview";
 
-  const [activeTab, setActiveTab] = useState<TripTab>(initialTab);
+  const activeTab: TripTab = initialTab;
 
   const newLocationId = searchParams.get("locationId");
 
@@ -162,15 +170,11 @@ export default function TripDetailClient({ trip }: TripDetailClientProps) {
 
   const tripDuration = getTripDuration(trip.startDate, trip.endDate);
 
-  // ======================================
-  // TRIP COUNTDOWN STATE
-  // ======================================
+  const isClient = useIsClient();
 
-  const [tripCountdown, setTripCountdown] = useState<string>("—");
-
-  useEffect(() => {
-    setTripCountdown(getTripCountdown(trip.startDate, trip.endDate));
-  }, [trip.startDate, trip.endDate]);
+  const tripCountdown = isClient
+    ? getTripCountdown(trip.startDate, trip.endDate)
+    : "—";
 
   // ======================================
   // FLIGHT MANAGEMENT STATE
@@ -212,11 +216,6 @@ export default function TripDetailClient({ trip }: TripDetailClientProps) {
 
   const handledFlightNavigationRef = useRef<string | null>(null);
 
-  // Keep tab synchronized with URL changes.
-  useEffect(() => {
-    setActiveTab(initialTab);
-  }, [initialTab]);
-
   // ======================================
   // SAVE ITINERARY SCROLL POSITION
   // ======================================
@@ -245,8 +244,6 @@ export default function TripDetailClient({ trip }: TripDetailClientProps) {
 
   function handleTabChange(value: string) {
     if (!isTripTab(value)) return;
-
-    setActiveTab(value);
 
     const params = new URLSearchParams(searchParams.toString());
 
